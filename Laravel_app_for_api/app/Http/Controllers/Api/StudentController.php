@@ -20,7 +20,7 @@ class StudentController extends Controller
        else {
         return response()->json( [
             'status'=> 404 ,
-            'students'=> 'there are no students on data base',
+            'message'=> 'there are no students on data base',
         ],404) ;
        }
 
@@ -85,7 +85,7 @@ class StudentController extends Controller
        }
        public function edit ($id){
 
-   $student = student::find($id);
+         $student = student::find($id);
         if($student){
             return response()->json([
                 'status'=>200 ,

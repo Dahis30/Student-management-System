@@ -1,7 +1,12 @@
 <template>
   <div>
     <div class="container">
-      <div class="card mt-5">
+      <div class="mt-3" style="text-align: center">
+        <button class="btn btn-success" v-if="delete_msg.length > 0">
+          {{ delete_msg }}
+        </button>
+      </div>
+      <div class="card mt-2">
         <div class="card-hearder mt-3 mx-2">
           <h4>
             Students
@@ -29,16 +34,28 @@
                 <td>{{ student.phone }}</td>
                 <td>{{ student.course }}</td>
                 <td>
-                  <RouterLink :to="{path : '/Student/'+student.id+'/edit'}" class="btn btn-success">EDIT</RouterLink>
+                  <RouterLink
+                    :to="{ path: '/Student/' + student.id + '/edit' }"
+                    class="btn btn-success"
+                    >EDIT</RouterLink
+                  >
                 </td>
                 <td>
-                  <RouterLink to="/" class="btn btn-danger">DELETE</RouterLink>
+                  <button
+                    @click="deletStudent(student.id)"
+                    class="btn btn-danger"
+                  >
+                    DELETE
+                  </button>
                 </td>
+                <!-- <td>
+                  <RouterLink :to="{path :'/Student/'+student.id+'/delete'}" class="btn btn-danger">DELETE</RouterLink>
+                </td> -->
               </tr>
             </tbody>
             <tbody v-else>
               <tr>
-                <td colspan="7">LOADING ...</td>
+                <td colspan="7">{{ no_student_msg }}</td>
               </tr>
             </tbody>
           </table>
@@ -56,6 +73,8 @@ export default {
   data() {
     return {
       students: [],
+      delete_msg: "",
+      no_student_msg: "Loading",
     };
   },
   mounted() {
@@ -64,9 +83,43 @@ export default {
   },
   methods: {
     getStudents() {
-      axios.get("http://127.0.0.1:8000/api/student").then((res) => {
-        this.students = res.data.students;
-      });
+      var mythis = this;
+      axios
+        .get("http://127.0.0.1:8000/api/student")
+        .then((res) => {
+          this.students = res.data.students;
+        })
+        .catch(function (error) {
+          if (error.response) {
+            if (error.response.data.status == 404) {
+              mythis.no_student_msg = error.response.data.message;
+            }
+          } else if (error.request) {
+            console.log(error.request);
+          } else {
+            console.log("Error", error.message);
+          }
+          console.log(error.config);
+        });
+    },
+    deletStudent(id) {
+      axios
+        .delete(`http://127.0.0.1:8000/api/student/${id}/delete`)
+        .then((res) => {
+          this.delete_msg = "student number " + id + " was deleted";
+        })
+        .catch(function (error) {
+          if (error.response) {
+            if (error.response.status == 404) {
+              alert(error.response.data.message);
+            }
+          } else if (error.request) {
+            console.log(error.request);
+          } else {
+            console.log("Error", error.message);
+          }
+          console.log(error.config);
+        });
     },
   },
   components: { RouterLink },
